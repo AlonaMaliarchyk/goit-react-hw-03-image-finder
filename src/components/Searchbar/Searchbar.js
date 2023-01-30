@@ -11,7 +11,6 @@ class Searchbar extends Component {
     handleChange = ({ target }) => {
         const { name, value } = target;
         this.setState({ [name]: value })
-        //console.log(this.state);
     };
 
     handlerSubmit = (event) => {

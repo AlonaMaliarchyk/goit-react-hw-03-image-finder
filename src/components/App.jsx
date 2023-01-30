@@ -15,6 +15,8 @@ class App extends Component {
     loading: false,
     page: 1,
     isMoreBtnVisible: false,
+    isModalVisible: false,
+    imgDetails: null,
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -29,11 +31,11 @@ class App extends Component {
       this.setState({ loading: true });
       const { search, page } = this.state;
       const data = await searchPhoto(search, page);
-      console.log(data.hits);
       if (data.totalHits > 0) {
         this.setState(({ images }) => ({
           images: [...images, ...data.hits],
           isMoreBtnVisible: page < Math.ceil(data.totalHits / 12),
+          isModalVisible: false,
         }))
       }
     } catch(error) {
@@ -43,26 +45,39 @@ class App extends Component {
     }
   }
   handlerSearch = (value) => {
-    this.setState({ search: value ,images:[], page: 1})
+    this.setState({ search: value ,images:[], page: 1, isModalVisible: false})
   }
 
   loadMore = () => {
     this.setState(({ page }) => ({ page: page + 1 }))
-    console.log('3333', this.state);
+  }
+
+  showModal = largeImageURL => {
+      this.setState({
+      imgDetails:  largeImageURL,
+      isModalVisible: true,
+      })
+  }
+
+  closeModal = () => {
+    this.setState({
+      imgDetails:  null,
+      isModalVisible: false,
+      })
   }
 
   render() {
-    const { images, loading, error, isMoreBtnVisible } = this.state;
-    const { handlerSearch, loadMore } = this;
-
+    const { images, loading, error, isMoreBtnVisible, isModalVisible, imgDetails} = this.state;
+    const { handlerSearch, loadMore, closeModal, showModal} = this;
+    
     return (
         <>
         <Searchbar onSubmit={handlerSearch} />
-        <ImageGallery images={images} />
+        <ImageGallery images={images} showModal={ showModal} />
         {error && <p className={css.error}>Something went wrong. Please, try again later!</p>}
         {loading && <Loader />}
         {isMoreBtnVisible && <LoadBtn loadMoreHendler={loadMore} />}
-        
+        {isModalVisible && <Modal largeImageURL={imgDetails} close={closeModal} />}
         </>
   );
   }
